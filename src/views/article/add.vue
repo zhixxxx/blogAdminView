@@ -7,10 +7,26 @@
       <el-form-item label="文章描述" style="width: 500px;">
         <el-input type="textarea" v-model="form.desc"></el-input>
       </el-form-item>
-      <el-form-item label="是否有图" prop="is_single">
+      <el-form-item label="文章分类" prop="">
+        <el-cascader
+          v-model="form.category_id"
+          :options="categoryList"
+          :props="{ expandTrigger: 'hover' }"
+          :show-all-levels="false"
+          @change="handleChange"
+        ></el-cascader>
+        <!-- <el-select v-model="form.category_id" placeholder="请选择活动区域">
+      <el-option :label="item.name" :value="item.id" v-for="item in this.categoryList" :key="item.value"></el-option>
+        </el-select>-->
+      </el-form-item>
+      <el-form-item label="图片张数">
         <el-radio :label="0" v-model="form.is_single">无图</el-radio>
         <el-radio :label="1" v-model="form.is_single">单图</el-radio>
         <el-radio :label="2" v-model="form.is_single">多图</el-radio>
+      </el-form-item>
+      <el-form-item label="是否置顶">
+        <el-radio :label="1" v-model="form.is_top">是</el-radio>
+        <el-radio :label="2" v-model="form.is_top">否</el-radio>
       </el-form-item>
       <el-form-item label="图片" prop="singleImage" v-if="form.is_single == 1">
         <el-upload
@@ -38,9 +54,9 @@
         <img width="100%" :src="dialogImageUrl" alt />
       </el-dialog>
       <el-form-item label="文章内容" prop="source_content">
-        <mavon-editor v-model="form.content" style="min-height: 400px"/>
+        <mavon-editor v-model="form.content" style="min-height: 400px" />
       </el-form-item>
-      <!-- <el-form-item label="文章内容">
+      <el-form-item label="文章内容">
         <mavon-editor
           class="md"
           :value="form.content"
@@ -48,9 +64,10 @@
           :defaultOpen="prop.defaultOpen"
           :toolbarsFlag="prop.toolbarsFlag"
           :editable="prop.editable"
+          :code_style="prop.code_style"
           :scrollStyle="prop.scrollStyle"
         ></mavon-editor>
-      </el-form-item> -->
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="submitForm('ruleForm')">立即创建</el-button>
       </el-form-item>
@@ -60,7 +77,6 @@
 
 <script>
 import request from "@/utils/request";
-import "mavon-editor/dist/css/index.css";
 
 export default {
   data() {
@@ -68,18 +84,25 @@ export default {
       form: {
         name: "",
         desc: "",
+        category_id: 0,
         is_single: 0,
+        is_top: 2,
         images: "",
-        content: "",
+        content: ""
       },
+      categoryList: [
+        {
+          label: "第一个",
+          value: "1",
+          children: [
+            { label: "第一个1", value: "1" },
+            { label: "第一个2", value: "1" }
+          ]
+        }
+      ],
       rules: {
         name: [{ required: true, message: "请输入活动名称", trigger: "blur" }],
-        is_single: [
-          { required: true, message: "请选择列表图片张数", trigger: "blur" }
-        ],
-        content: [
-          { required: true, message: "内容不能为空", trigger: "blur" }
-        ]
+        content: [{ required: true, message: "内容不能为空", trigger: "blur" }]
       },
       dialogImageUrl: "",
       dialogVisible: false
@@ -92,18 +115,28 @@ export default {
         defaultOpen: "preview", //edit： 默认展示编辑区域 ， preview： 默认展示预览区域
         editable: false,
         toolbarsFlag: false,
-        scrollStyle: true
+        scrollStyle: true,
+        code_style: "code-github"
       };
     }
   },
   mounted() {
-
+    // this.getCategory();
   },
   methods: {
-    change(value, render) {
-      this.form.compile_content = render;
+    handleChange(value) {
+      console.log(value);
     },
-
+    //文章分类列表
+    getCategory() {
+      request({
+        url: "/category/list",
+        method: "get",
+        params: { source: "article" }
+      }).then(res => {
+        this.categoryList = res.data;
+      });
+    },
     submitForm(formName) {
       this.$refs[formName].validate(valid => {
         if (valid) {
@@ -173,6 +206,11 @@ export default {
   width: 178px;
   height: 178px;
   display: block;
+}
+.blockquote {
+  width: 100%;
+  height: 300px;
+  background: red;
 }
 </style>
 
