@@ -72,7 +72,14 @@ export const constantRoutes = [
         name: 'ArticleAdd',
         hidden: true,
         component: () => import('@/views/article/add'),
-        meta: { title: '添加文章', icon: 'table' }
+        meta: { title: '添加-修改、文章', icon: 'table' }
+      },
+      {
+        path: 'info',
+        name: 'ArticleInfo',
+        hidden: true,
+        component: () => import('@/views/article/info'),
+        meta: { title: '文章详情', icon: 'table' }
       }
     ]
   },

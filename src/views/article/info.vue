@@ -1,30 +1,17 @@
 <template>
   <div class="app-container">
-    <el-form :model="form" :rules="rules" ref="form" label-width="120px" class="demo-ruleForm">
-      <el-form-item label="文章标题" style="width: 400px" prop="title">
-        <el-input v-model="form.title"></el-input>
-      </el-form-item>
-      <el-form-item label="文章描述" style="width: 500px;">
-        <el-input type="textarea" v-model="form.desc"></el-input>
-      </el-form-item>
-      <el-form-item label="文章分类" prop="category_id">
-        <el-select v-model="form.category_id" placeholder="请选择文章分类">
-          <el-option
-            :label="item.name"
-            :value="item.id"
-            v-for="item in categoryList"
-            :key="item.id"
-          ></el-option>
-        </el-select>
-      </el-form-item>
+    <el-form :model="form" label-width="120px" class="demo-ruleForm">
+      <el-form-item label="文章标题" style="width: 400px">{{ form.title }}</el-form-item>
+      <el-form-item label="文章描述" style="width: 500px;">{{ form.desc }}</el-form-item>
+      <el-form-item label="文章分类" prop="category_id">{{ form.category.name }}</el-form-item>
       <el-form-item label="图片张数">
-        <el-radio :label="0" v-model="form.is_single">无图</el-radio>
-        <el-radio :label="1" v-model="form.is_single">单图</el-radio>
-        <el-radio :label="2" v-model="form.is_single">多图</el-radio>
+        <template v-if="form.is_single == 0">无图</template>
+        <template v-else-if="form.is_single == 1">单图</template>
+        <template v-else-if="form.is_single == 2">多图</template>
       </el-form-item>
       <el-form-item label="是否置顶">
-        <el-radio :label="1" v-model="form.is_top">是</el-radio>
-        <el-radio :label="2" v-model="form.is_top">否</el-radio>
+        <template v-if="form.is_top == 1">是</template>
+        <template v-if="form.is_top == 2">否</template>
       </el-form-item>
       <el-form-item label="图片" v-if="form.is_single == 1">
         <el-upload
@@ -51,10 +38,18 @@
       <el-dialog :visible.sync="dialogVisible">
         <img width="100%" :src="dialogImageUrl" alt />
       </el-dialog>
-      <el-form-item label="文章内容" prop="content">
-        <mavon-editor v-model="form.content" style="min-height: 400px" />
+      <el-form-item label="文章内容">
+        <mavon-editor
+          class="md"
+          :value="form.content"
+          :subfield="prop.subfield"
+          :defaultOpen="prop.defaultOpen"
+          :toolbarsFlag="prop.toolbarsFlag"
+          :editable="prop.editable"
+          :code_style="prop.code_style"
+          :scrollStyle="prop.scrollStyle"
+        ></mavon-editor>
       </el-form-item>
-
       <el-form-item>
         <el-button type="primary" @click="submitForm('form')">立即创建</el-button>
       </el-form-item>
@@ -64,7 +59,6 @@
 
 <script>
 import request from "@/utils/request";
-import { Loading } from "element-ui";
 
 export default {
   data() {
@@ -91,6 +85,18 @@ export default {
       dialogVisible: false
     };
   },
+  computed: {
+    prop() {
+      return {
+        subfield: false, // 单双栏模式
+        defaultOpen: "preview", //edit： 默认展示编辑区域 ， preview： 默认展示预览区域
+        editable: false,
+        toolbarsFlag: false,
+        scrollStyle: true,
+        code_style: "code-github"
+      };
+    }
+  },
   mounted() {
     this.getCategory();
     this.getInfo();
@@ -106,7 +112,18 @@ export default {
         this.categoryList = res.data;
       });
     },
-    //添加文章
+    getInfo() {
+      var id = this.$route.query.id;
+      if (id > 0) {
+        request({
+          url: "/article/info",
+          method: "get",
+          params: { id: id }
+        }).then(res => {
+          this.form = res.data;
+        });
+      }
+    },
     submitForm(form) {
       this.$refs[form].validate(valid => {
         if (valid) {
@@ -137,45 +154,7 @@ export default {
           return false;
         }
       });
-    },
-    getInfo() {
-      var id = this.$route.query.id;
-      if (id > 0) {
-        request({
-          url: "/article/info",
-          method: "get",
-          params: { id: id }
-        }).then(res => {
-          this.form = res.data;
-        });
-      }
-    },
-    // 单张图片上传----------------------
-    handleAvatarSuccess(res, file) {
-      this.form.images = URL.createObjectURL(file.raw);
-    },
-    beforeAvatarUpload(file) {
-      const isJPG = file.type === "image/jpeg";
-      const isLt2M = file.size / 1024 / 1024 < 2;
-
-      if (!isJPG) {
-        this.$message.error("上传头像图片只能是 JPG 格式!");
-      }
-      if (!isLt2M) {
-        this.$message.error("上传头像图片大小不能超过 2MB!");
-      }
-      return isJPG && isLt2M;
-    },
-    // ------------------------------
-    // 多张图片上传----------------------
-    handleRemove(file, fileList) {
-      console.log(file, fileList);
-    },
-    handlePictureCardPreview(file) {
-      this.dialogImageUrl = file.url;
-      this.dialogVisible = true;
     }
-    // -----------------------------------
   }
 };
 </script>

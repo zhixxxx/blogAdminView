@@ -14,6 +14,7 @@
       </el-form-item>
     </el-form>
     <el-table :data="tableData" style="width: 100%">
+      <el-table-column prop="id" label="ID"></el-table-column>
       <el-table-column prop="title" label="标题"></el-table-column>
       <el-table-column prop="desc" label="描述"></el-table-column>
       <el-table-column label="图片数量">
@@ -50,12 +51,26 @@
       </el-table-column>
       <el-table-column label="操作" width="220">
         <template slot-scope="scope">
-          <el-button size="mini" type="info">详情</el-button>
-          <el-button size="mini" type="primary">编辑</el-button>
+          <el-button size="mini" type="success">详情</el-button>
+          <el-button size="mini" type="primary" @click="editRow(scope.row)">编辑</el-button>
           <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
+    <br />
+    <el-row>
+      <el-col :span="24" :offset="16">
+        <el-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          background
+          :page-sizes="[5, 10, 20, 40]"
+          :page-size="form.pageSize"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="this.total"
+        ></el-pagination>
+      </el-col>
+    </el-row>
   </div>
 </template>
 
@@ -69,6 +84,7 @@ export default {
         page: 1,
         pageSize: 10
       },
+      total: 0,
       tableData: []
     };
   },
@@ -83,6 +99,23 @@ export default {
         params: this.form
       }).then(res => {
         this.tableData = res.data.data;
+        this.total = res.data.total;
+      });
+    },
+    handleSizeChange(val) {
+      this.form.pageSize = val;
+      this.getList();
+    },
+    handleCurrentChange(val) {
+      this.form.page = val;
+      this.getList();
+    },
+    editRow(row) {
+      this.$router.replace({
+        path: "/article/add", //跳转文章编译页
+        query: {
+          id: row.id
+        }
       });
     },
     onSubmit() {
