@@ -52,9 +52,19 @@
         <img width="100%" :src="dialogImageUrl" alt />
       </el-dialog>
       <el-form-item label="文章内容" prop="content">
-        <mavon-editor v-model="form.content" style="min-height: 400px" />
+        <mavon-editor
+          class="md"
+          :value="form.content"
+          :subfield="prop.subfield"
+          :defaultOpen="prop.defaultOpen"
+          :toolbarsFlag="prop.toolbarsFlag"
+          :editable="prop.editable"
+          :scrollStyle="prop.scrollStyle"
+          :codeStyle="prop.codeStyle"
+          :ishljs="prop.ishljs"
+          style="min-height: 400px"
+        ></mavon-editor>
       </el-form-item>
-
       <el-form-item>
         <el-button type="primary" @click="submitForm('form')">立即创建</el-button>
       </el-form-item>
@@ -90,6 +100,20 @@ export default {
       dialogImageUrl: "",
       dialogVisible: false
     };
+  },
+  computed: {
+    prop() {
+      let data = {
+        subfield: true, // 单双栏模式
+        defaultOpen: "preview", //edit： 默认展示编辑区域 ， preview： 默认展示预览区域
+        editable: true,
+        toolbarsFlag: true,
+        scrollStyle: true,
+        codeStyle: "monokai-sublime",
+        ishljs: true
+      };
+      return data;
+    }
   },
   mounted() {
     this.getCategory();
