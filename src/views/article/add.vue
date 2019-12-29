@@ -7,15 +7,24 @@
       <el-form-item label="文章描述" style="width: 500px;">
         <el-input type="textarea" v-model="form.desc"></el-input>
       </el-form-item>
+
       <el-form-item label="文章分类" prop="category_id">
-        <el-select v-model="form.category_id" placeholder="请选择文章分类">
+        <el-select v-model="form.category_id" multiple placeholder="请选择">
+          <el-option
+            v-for="item in categoryList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          ></el-option>
+        </el-select>
+        <!-- <el-select v-model="form.category_id" placeholder="请选择文章分类">
           <el-option
             :label="item.name"
             :value="item.id"
             v-for="item in categoryList"
             :key="item.id"
           ></el-option>
-        </el-select>
+        </el-select>-->
       </el-form-item>
       <el-form-item label="图片张数">
         <el-radio :label="0" v-model="form.is_single">无图</el-radio>
@@ -94,8 +103,7 @@ export default {
         title: [{ required: true, message: "请输入活动名称", trigger: "blur" }],
         category_id: [
           { required: true, message: "请选择文章分类", trigger: "blur" }
-        ],
-        content: [{ required: true, message: "内容不能为空", trigger: "blur" }]
+        ]
       },
       dialogImageUrl: "",
       dialogVisible: false
