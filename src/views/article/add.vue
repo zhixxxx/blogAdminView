@@ -8,23 +8,10 @@
         <el-input type="textarea" v-model="form.desc"></el-input>
       </el-form-item>
 
-      <el-form-item label="文章分类" prop="category_id">
-        <el-select v-model="form.category_id" multiple placeholder="请选择">
-          <el-option
-            v-for="item in categoryList"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id"
-          ></el-option>
+      <el-form-item label="文章标签" prop="label">
+        <el-select v-model="form.label" multiple placeholder="请选择">
+          <el-option v-for="item in labelList" :key="item.id" :label="item.name" :value="item.id"></el-option>
         </el-select>
-        <!-- <el-select v-model="form.category_id" placeholder="请选择文章分类">
-          <el-option
-            :label="item.name"
-            :value="item.id"
-            v-for="item in categoryList"
-            :key="item.id"
-          ></el-option>
-        </el-select>-->
       </el-form-item>
       <el-form-item label="图片张数">
         <el-radio :label="0" v-model="form.is_single">无图</el-radio>
@@ -72,10 +59,11 @@
           :codeStyle="prop.codeStyle"
           :ishljs="prop.ishljs"
           style="min-height: 400px"
-        ></mavon-editor>
+          @change="change"
+        />
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="submitForm('form')">立即创建</el-button>
+        <el-button type="primary" @click="submitForm('form')">保存</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -89,21 +77,19 @@ export default {
   data() {
     return {
       form: {
-        id: 9,
         title: "",
         desc: "",
-        category_id: "",
+        label: [],
         is_single: 0,
         is_top: 2,
         images: "",
         content: ""
       },
       categoryList: [],
+      labelList: [],
       rules: {
         title: [{ required: true, message: "请输入活动名称", trigger: "blur" }],
-        category_id: [
-          { required: true, message: "请选择文章分类", trigger: "blur" }
-        ]
+        label: [{ required: true, message: "请选择文章标签", trigger: "blur" }]
       },
       dialogImageUrl: "",
       dialogVisible: false
@@ -124,18 +110,18 @@ export default {
     }
   },
   mounted() {
-    this.getCategory();
+    this.getLabelList();
     this.getInfo();
   },
   methods: {
-    //文章分类列表
-    getCategory() {
+    //文章标签列表
+    getLabelList() {
       request({
-        url: "/category/list",
+        url: "/label/list",
         method: "get",
         params: { source: "article" }
       }).then(res => {
-        this.categoryList = res.data;
+        this.labelList = res.data;
       });
     },
     //添加文章
@@ -169,6 +155,9 @@ export default {
           return false;
         }
       });
+    },
+    change(value, render) {
+      this.form.content = value;
     },
     getInfo() {
       var id = this.$route.query.id;

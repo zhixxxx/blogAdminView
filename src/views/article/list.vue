@@ -14,7 +14,7 @@
       </el-form-item>
     </el-form>
     <el-table :data="tableData" style="width: 100%">
-      <el-table-column prop="id" label="ID"></el-table-column>
+      <el-table-column prop="id" label="ID" width="70"></el-table-column>
       <el-table-column prop="title" label="标题"></el-table-column>
       <el-table-column prop="desc" label="描述"></el-table-column>
       <el-table-column label="图片数量">
@@ -43,7 +43,7 @@
           <el-tag size="warning" v-if="scope.row.is_admin == 2">前端</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="创建时间">
+      <el-table-column label="创建时间" min-width="85">
         <template slot-scope="scope">
           <i class="el-icon-time"></i>
           <span style="margin-left: 10px">{{ scope.row.created_at }}</span>
@@ -51,7 +51,7 @@
       </el-table-column>
       <el-table-column label="操作" width="220">
         <template slot-scope="scope">
-          <el-button size="mini" type="success">详情</el-button>
+          <el-button size="mini" type="success" @click="infoRow(scope.row)">详情</el-button>
           <el-button size="mini" type="primary" @click="editRow(scope.row)">编辑</el-button>
           <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
         </template>
@@ -118,6 +118,14 @@ export default {
         }
       });
     },
+    infoRow(row) {
+      this.$router.replace({
+        path: "/article/info", //跳转文章详情页
+        query: {
+          id: row.id
+        }
+      });
+    },
     onSubmit() {
       this.getList();
     },
@@ -126,7 +134,27 @@ export default {
     },
 
     //删除
-    handleDelete(index, row) {}
+    handleDelete(index, row) {
+      request({
+        url: "/article/del",
+        method: "post",
+        data: { id: row.id }
+      }).then(res => {
+        if (res.code === 200) {
+          this.$message({
+            message: "删除成功",
+            type: "success",
+            duration: 1000
+          });
+          this.getList();
+        } else {
+          this.$message({
+            message: res.msg,
+            type: "error"
+          });
+        }
+      });
+    }
   }
 };
 </script>

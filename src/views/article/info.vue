@@ -1,19 +1,24 @@
 <template>
   <div class="app-container">
     <el-form :model="form" label-width="120px" class="demo-ruleForm">
-      <el-form-item label="文章标题" style="width: 400px">{{ form.title }}</el-form-item>
-      <el-form-item label="文章描述" style="width: 500px;">{{ form.desc }}</el-form-item>
-      <el-form-item label="文章分类" prop="category_id">{{ form.category.name }}</el-form-item>
-      <el-form-item label="图片张数">
+      <el-form-item label="文章标题：" style="width: 400px">{{ form.title }}</el-form-item>
+      <el-form-item label="文章描述：" style="width: 500px;">{{ form.desc }}</el-form-item>
+      <el-form-item label="文章标签：" prop="label">
+        <el-select v-model="form.label" disabled multiple placeholder="请选择">
+          <el-option v-for="item in labelList" :key="item.id" :label="item.name" :value="item.id"></el-option>
+        </el-select>
+      </el-form-item>
+      <!-- <el-form-item label="文章标签" prop="category_id">{{ form.category.name }}</el-form-item> -->
+      <el-form-item label="图片张数：">
         <template v-if="form.is_single == 0">无图</template>
         <template v-else-if="form.is_single == 1">单图</template>
         <template v-else-if="form.is_single == 2">多图</template>
       </el-form-item>
-      <el-form-item label="是否置顶">
+      <el-form-item label="是否置顶：">
         <template v-if="form.is_top == 1">是</template>
         <template v-if="form.is_top == 2">否</template>
       </el-form-item>
-      <el-form-item label="图片" v-if="form.is_single == 1">
+      <el-form-item label="图片：" v-if="form.is_single == 1">
         <el-upload
           class="avatar-uploader"
           action="https://jsonplaceholder.typicode.com/posts/"
@@ -25,7 +30,7 @@
           <i v-else class="el-icon-plus avatar-uploader-icon"></i>
         </el-upload>
       </el-form-item>
-      <el-form-item label="列表图片" v-if="form.is_single == 2">
+      <el-form-item label="列表图片：" v-if="form.is_single == 2">
         <el-upload
           action="https://jsonplaceholder.typicode.com/posts/"
           list-type="picture-card"
@@ -38,7 +43,7 @@
       <el-dialog :visible.sync="dialogVisible">
         <img width="100%" :src="dialogImageUrl" alt />
       </el-dialog>
-      <el-form-item label="文章内容">
+      <el-form-item label="文章内容：">
         <mavon-editor
           class="md"
           :value="form.content"
@@ -46,12 +51,10 @@
           :defaultOpen="prop.defaultOpen"
           :toolbarsFlag="prop.toolbarsFlag"
           :editable="prop.editable"
-          :code_style="prop.code_style"
           :scrollStyle="prop.scrollStyle"
-        ></mavon-editor>
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="submitForm('form')">立即创建</el-button>
+          :codeStyle="prop.codeStyle"
+          :ishljs="prop.ishljs"
+        />
       </el-form-item>
     </el-form>
   </div>
@@ -74,6 +77,7 @@ export default {
         content: ""
       },
       categoryList: [],
+      labelList:[],
       rules: {
         title: [{ required: true, message: "请输入活动名称", trigger: "blur" }],
         category_id: [
@@ -98,18 +102,18 @@ export default {
     }
   },
   mounted() {
-    this.getCategory();
+    this.getLabelList();
     this.getInfo();
   },
   methods: {
-    //文章分类列表
-    getCategory() {
+    //文章标签列表
+    getLabelList() {
       request({
-        url: "/category/list",
+        url: "/label/list",
         method: "get",
         params: { source: "article" }
       }).then(res => {
-        this.categoryList = res.data;
+        this.labelList = res.data;
       });
     },
     getInfo() {
