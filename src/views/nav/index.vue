@@ -3,13 +3,8 @@
     <el-button type="primary" size="small" @click="onAdd()">添加</el-button>
     <el-table :data="tableData" style="width: 100%">
       <el-table-column prop="id" label="ID"></el-table-column>
-      <el-table-column prop="name" label="标签名" width="180"></el-table-column>
-      <el-table-column label="状态">
-        <template slot-scope="scope">
-          <el-tag v-if="scope.row.status == 1" type="success">启用</el-tag>
-          <el-tag v-if="scope.row.status == 2" type="danger">禁用</el-tag>
-        </template>
-      </el-table-column>
+      <el-table-column prop="name" label="导航名" width="180"></el-table-column>
+      <el-table-column prop="weight" label="权重" width="180"></el-table-column>
       <el-table-column prop="created_at" label="创建时间"></el-table-column>
       <el-table-column label="操作">
         <template slot-scope="scope">
@@ -37,9 +32,8 @@
         <el-form-item label="标签名" prop="name" style="width: 500px;">
           <el-input v-model="form.name"></el-input>
         </el-form-item>
-        <el-form-item label="是否启用">
-          <el-radio :label="1" v-model="form.status">是</el-radio>
-          <el-radio :label="2" v-model="form.status">否</el-radio>
+        <el-form-item label="权重" style="width: 500px;">
+          <el-input v-model="form.weight" placeholder="权重数量默认为0"></el-input>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="submitForm('form')" size="small">保存</el-button>
@@ -59,7 +53,7 @@ export default {
     return {
       form: {
         name: "",
-        status: 1
+        weight:0,
       },
       listQuery: {
         page: 1,
@@ -80,7 +74,7 @@ export default {
   methods: {
     getList() {
       request({
-        url: "/label/list",
+        url: "/navigation/list",
         method: "get",
         params: this.listQuery
       }).then(res => {
@@ -91,7 +85,7 @@ export default {
     resetForm() {
       this.form = {
         name: "",
-        status: 1
+        weight:0
       };
     },
     handleSizeChange(val) {
@@ -104,7 +98,7 @@ export default {
     },
     handleDelete(row) {
       request({
-        url: "/label/del",
+        url: "/navigation/del",
         method: "post",
         data: { id: row }
       }).then(res => {
@@ -133,15 +127,15 @@ export default {
       this.resetForm();
       this.title = "编辑";
       this.form.id = row.id;
+      this.form.weight = row.weight;
       this.form.name = row.name;
-      this.form.status = row.status;
       this.dialogTableVisible = true;
     },
     submitForm(form) {
       this.$refs[form].validate(valid => {
         if (valid) {
           request({
-            url: "/label/save",
+            url: "/navigation/save",
             method: "post",
             data: this.form
           }).then(res => {
